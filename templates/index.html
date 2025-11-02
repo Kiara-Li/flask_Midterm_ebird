@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>Sleepy Birds</title>
+</head>
+<body style="background-color:#111; color:white; text-align:center;">
+  <h2>当你睡觉时，鸟儿在干什么 🐦💤</h2>
+
+  <form action="/sleep" method="post">
+    入睡时间: <input type="time" name="sleep_start" required>
+    起床时间: <input type="time" name="sleep_end" required>
+    <button type="submit">看看鸟儿</button>
+  </form>
+
+  <div style="margin-top:20px;">
+    {{ map_html|safe }}
+  </div>
+</body>
+</html>
+</form>
+{% endblock %}
