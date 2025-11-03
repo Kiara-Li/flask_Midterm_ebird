@@ -8,6 +8,29 @@ from folium import IFrame
 
 
 app = Flask(__name__)
+# 获取鸟类图片的函数
+def get_bird_image(species_name):
+    """用 Wikipedia API 获取鸟类缩略图"""
+    try:
+        url = "https://en.wikipedia.org/w/api.php"
+        params = {
+            "action": "query",
+            "titles": species_name,
+            "prop": "pageimages",
+            "format": "json",
+            "pithumbsize": 200  # 缩略图宽度
+        }
+        r = requests.get(url, params=params, timeout=5).json()
+        pages = r.get("query", {}).get("pages", {})
+        for page in pages.values():
+            thumb = page.get("thumbnail", {}).get("source")
+            if thumb:
+                return thumb
+    except:
+        pass
+    # 没找到图片就返回占位图
+    return "https://via.placeholder.com/200x150?text=No+Image"
+
 @app.route('/birdsound')
 def bird_sound():
     species = request.args.get('name')

@@ -29,25 +29,40 @@
     {{ map_html|safe }}
   </div>
   <script>
-async function loadBirdSound(species) {
-  const div = document.getElementById("audio-" + species.replace(/ /g, "_"));
-  div.innerHTML = "加载中...";
-  try {
-    const res = await fetch(`/birdsound?name=${encodeURIComponent(species)}`);
-    const data = await res.json();
-    if (!data.url) {
-      div.innerHTML = "❌ 没找到录音";
-      return;
-    }
-    const audio = document.createElement("audio");
-    audio.controls = true;
-    audio.src = data.url;
-    audio.style.width = "200px";
-    div.innerHTML = "";
-    div.appendChild(audio);
-  } catch (e) {
-    div.innerHTML = "⚠️ 加载失败";
-  }
+function loadBirdSound(name){
+  // request proxy URL from server
+  fetch('/birdsound?name='+encodeURIComponent(name))
+    .then(r=>r.json())
+    .then(data=>{
+      if(!data.url){
+        alert('No recording found for ' + name);
+        return;
+      }
+      const divId = 'audio-' + name.replace(/ /g,'_').replace(/'/g,'');
+      // try to find container in parent document or inside any same-origin iframes
+      let container = document.getElementById(divId);
+      if(!container){
+        for(const ifr of document.querySelectorAll('iframe')){
+          try{
+            const doc = ifr.contentDocument || ifr.contentWindow.document;
+            const el = doc.getElementById(divId);
+            if(el){ container = el; break; }
+          }catch(e){
+            /* cross-origin or other access error - ignore */
+          }
+        }
+      }
+      if(!container){
+        console.warn('audio container not found:', divId);
+        return;
+      }
+      // insert audio element
+      container.innerHTML = '<audio controls src="' + data.url + '"></audio>';
+    })
+    .catch(e=>{
+      console.error('loadBirdSound error', e);
+      alert('Failed to load audio');
+    });
 }
 </script>
 </body>
