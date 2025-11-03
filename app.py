@@ -1,35 +1,51 @@
 from flask import Flask, render_template, request, jsonify,Response,stream_with_context
 from datetime import datetime, timedelta
 import requests
+import wikipedia
 import urllib.parse
 import pandas as pd
 import folium
 from folium import IFrame
 
-
 app = Flask(__name__)
 # 获取鸟类图片的函数
-def get_bird_image(species_name):
-    """用 Wikipedia API 获取鸟类缩略图"""
+def get_bird_image_wikipedia(bird_name):
+    """
+    使用 python-wikipedia 库获取鸟类的主图片。
+    返回 (image_url, is_free)：
+      - image_url: 图片 URL，如果找不到返回占位图
+      - is_free: 是否是自由版权图片
+    """
+    placeholder = "https://via.placeholder.com/300x200.png?text=No+Image"
+    
     try:
-        url = "https://en.wikipedia.org/w/api.php"
-        params = {
-            "action": "query",
-            "titles": species_name,
-            "prop": "pageimages",
-            "format": "json",
-            "pithumbsize": 200  # 缩略图宽度
-        }
-        r = requests.get(url, params=params, timeout=5).json()
-        pages = r.get("query", {}).get("pages", {})
-        for page in pages.values():
-            thumb = page.get("thumbnail", {}).get("source")
-            if thumb:
-                return thumb
-    except:
-        pass
-    # 没找到图片就返回占位图
-    return "https://via.placeholder.com/200x150?text=No+Image"
+        wikipedia.set_lang("en")
+        search_results = wikipedia.search(bird_name)
+        if not search_results:
+            return placeholder, False
+        
+        page_title = search_results[0]
+        page = wikipedia.page(page_title)
+        
+        if page.images:
+            img_url = page.images[0]
+            is_free = True
+            return img_url, is_free
+
+    except wikipedia.exceptions.DisambiguationError as e:
+        try:
+            page = wikipedia.page(e.options[0])
+            if page.images:
+                return page.images[0], True
+        except:
+            pass
+    except wikipedia.exceptions.PageError:
+        return placeholder, False
+    except Exception as e:
+        print(f"[{bird_name}] 获取 Wikipedia 图片失败: {e}")
+        return placeholder, False
+    
+    return placeholder, False
 
 @app.route('/birdsound')
 def bird_sound():
@@ -205,7 +221,7 @@ def sleep_birds():
     for _, row in df.iterrows():
         species = row['comName']
         species_id = species.replace(" ", "_").replace("'", "")
-        img_url = get_bird_image(species)
+        img_url, is_free = get_bird_image_wikipedia(species)
         species_js = species.replace("'", "\\'")  # JS 转义
 
         # 读取模板并渲染
