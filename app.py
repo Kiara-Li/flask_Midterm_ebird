@@ -66,19 +66,26 @@ def sleep_birds():
     # 获取表单数据
     sleep_start = request.form['sleep_start']
     sleep_end = request.form['sleep_end']
+    days_back = int(request.form.get('days_back', 1))  # 用户选择查看哪一天的夜晚，默认昨天
 
-    # 时间格式转换
-    now = datetime.utcnow()
-    start_time = datetime.strptime(sleep_start, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
-    end_time = datetime.strptime(sleep_end, "%H:%M").replace(year=now.year, month=now.month, day=now.day)
-    if end_time < start_time:
-        end_time += timedelta(days=1)
+    # 目标日期（UTC时间）
+    target_date = datetime.utcnow().date() - timedelta(days=days_back)
+
+    # 时间转换
+    start_time = datetime.strptime(sleep_start, "%H:%M").replace(
+        year=target_date.year, month=target_date.month, day=target_date.day
+    )
+    end_time = datetime.strptime(sleep_end, "%H:%M").replace(
+        year=target_date.year, month=target_date.month, day=target_date.day
+    )
+    if end_time <= start_time:
+        end_time += timedelta(days=1)  # 跨天
 
     # -------- eBird 数据请求 --------
     API_KEY = "sgqiqntt0ema"
     REGION = "US-NY"
-    BACK_DAYS = 1
-    MAX_RESULTS = 300
+    BACK_DAYS = days_back + 1  # 请求过去几天，确保获取目标日期
+    MAX_RESULTS = 500
 
     url = f"https://api.ebird.org/v2/data/obs/{REGION}/recent"
     params = {"back": BACK_DAYS, "maxResults": MAX_RESULTS}
@@ -95,14 +102,15 @@ def sleep_birds():
 
     # -------- 时间过滤 --------
     df['obsDt'] = pd.to_datetime(df['obsDt'])
-    df = df[(df['obsDt'].dt.time >= start_time.time()) | (df['obsDt'].dt.time <= end_time.time())]
+    # 过滤在 start_time 和 end_time 之间的数据
+    df = df[(df['obsDt'] >= start_time) & (df['obsDt'] <= end_time)]
 
     if df.empty:
         return "你睡觉时，鸟儿们也在休息 💤"
 
     # -------- 地图绘制 --------
     df['howMany'] = df['howMany'].fillna(1)
-    m = folium.Map(location=[df['lat'].mean(), df['lng'].mean()], zoom_start=6, tiles='CartoDB dark_matter')
+    m = folium.Map(tiles='CartoDB dark_matter')
 
     for _, row in df.iterrows():
         popup_text = f"<b>{row['comName']}</b><br>{row['locName']}<br>数量: {row['howMany']}<br>时间: {row['obsDt']}"
@@ -114,6 +122,9 @@ def sleep_birds():
             fill_opacity=0.7,
             popup=popup_text
         ).add_to(m)
+    if not df.empty:
+        lats_lngs = df[['lat', 'lng']].values.tolist()
+        m.fit_bounds(lats_lngs)
 
     map_html = m._repr_html_()
     return render_template('index.html', map_html=map_html)
