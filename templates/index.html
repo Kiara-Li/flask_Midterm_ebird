@@ -1,27 +1,27 @@
 {% extends "base.html" %}
 {% block content %}
 <body style="background-color:#111; color:white; text-align:center;">
-  <h2>当你睡觉时，鸟儿在干什么 🐦💤</h2>
+  <h2>What Are the Birds Doing While You Sleep?</h2>
 
   <form action="/sleep" method="post" style="margin-top:20px;">
     <!-- 睡觉时间 -->
     <div style="margin:10px 0;">
-      入睡时间: <input type="time" name="sleep_start" required>
-      起床时间: <input type="time" name="sleep_end" required>
+      Bedtime: <input type="time" name="sleep_start" required>
+      Wake-up Time: <input type="time" name="sleep_end" required>
     </div>
 
     <!-- 查看几天前的夜晚 -->
     <div style="margin:10px 0;">
-      查看哪一天的夜晚:
+      Night to View:
       <select name="days_back">
-        <option value="1">昨天</option>
-        <option value="2">前天</option>
-        <option value="3">前三天</option>
+        <option value="1">Yesterday</option>
+        <option value="2">Day Before Yesterday</option>
+        <option value="3">Three Days Ago</option>
       </select>
     </div>
 
     <div style="margin:20px 0;">
-      <button type="submit">看看鸟儿</button>
+      <button type="submit">View the Birds</button>
     </div>
   </form>
 

@@ -1,0 +1,13 @@
+<!-- templates/bird_card.html -->
+<div class="card" style="width: 18rem; text-align:center; font-size:14px;">
+  <img src="{{ img_url }}" class="card-img-top" alt="{{ species }}">
+  <div class="card-body">
+    <h5 class="card-title" style="font-size:18px; font-weight:bold;">{{ species }}</h5>
+    <p class="card-text">{{ locName }}</p>
+    <p class="card-text">Count: {{ howMany }}</p>
+    <p class="card-text">Time: {{ obsDt }}</p>
+    <button onclick="parent.loadBirdSound('{{ species_js }}')" class="btn btn-primary btn-sm">
+      🎵 Listen
+    </button>
+  </div>
+</div>

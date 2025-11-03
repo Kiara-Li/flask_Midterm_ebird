@@ -194,26 +194,32 @@ def sleep_birds():
     df = df[(df['obsDt'] >= start_time) & (df['obsDt'] <= end_time)]
 
     if df.empty:
-        return "你睡觉时，鸟儿们也在休息 💤"
+        return "When you sleep, the birds are resting too 💤"
 
     # -------- 地图绘制 --------
     df['howMany'] = df['howMany'].fillna(1)
     m = folium.Map(tiles='CartoDB dark_matter')
 
+    from flask import render_template_string
+
     for _, row in df.iterrows():
-         # 获取鸟叫声
         species = row['comName']
         species_id = species.replace(" ", "_").replace("'", "")
-        popup_html = f"""
-        <div style='width:220px;'>
-        <b>{species}</b><br>{row['locName']}<br>
-        数量: {row['howMany']}<br>时间: {row['obsDt']}<br>
-        <button onclick="parent.loadBirdSound('{species.replace("'", "\\'")}')" 
-                style="margin-top:5px;">🎵 听听看</button>
-        <div id="audio-{species_id}"></div>
-        </div>
-        """
-        iframe = IFrame(popup_html, width=250, height=150)
+        img_url = get_bird_image(species)
+        species_js = species.replace("'", "\\'")  # JS 转义
+
+        # 读取模板并渲染
+        with open("templates/bird_card.html") as f:
+            template = f.read()
+        popup_html = render_template_string(template,
+                                        img_url=img_url,
+                                        species=species,
+                                        locName=row['locName'],
+                                        howMany=row['howMany'],
+                                        obsDt=row['obsDt'],
+                                        species_js=species_js)
+
+        iframe = IFrame(popup_html, width=250, height=320)  # 高度调整为卡片高度
         popup = folium.Popup(iframe, max_width=250)
 
         folium.CircleMarker(
@@ -224,6 +230,7 @@ def sleep_birds():
             fill_opacity=0.7,
             popup=popup
         ).add_to(m)
+
     # 自动调整地图视野
     if not df.empty:
         lats_lngs = df[['lat', 'lng']].values.tolist()

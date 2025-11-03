@@ -1,0 +1,49 @@
+/* 全局字体和背景 */
+body {
+    font-family: "Geist", sans-serif;
+    font-optical-sizing: auto;
+    margin: 0;
+    padding: 0;
+}
+
+/* 全局链接 */
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* 按钮全局风格 */
+button {
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+/* 卡片全局样式 */
+.card {
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+/* Geist font, 可配合权重 */
+.geist-100 { font-family: "Geist", sans-serif; font-weight: 100; font-optical-sizing: auto; }
+.geist-200 { font-family: "Geist", sans-serif; font-weight: 200; font-optical-sizing: auto; }
+.geist-300 { font-family: "Geist", sans-serif; font-weight: 300; font-optical-sizing: auto; }
+.geist-400 { font-family: "Geist", sans-serif; font-weight: 400; font-optical-sizing: auto; }
+.geist-500 { font-family: "Geist", sans-serif; font-weight: 500; font-optical-sizing: auto; }
+.geist-600 { font-family: "Geist", sans-serif; font-weight: 600; font-optical-sizing: auto; }
+.geist-700 { font-family: "Geist", sans-serif; font-weight: 700; font-optical-sizing: auto; }
+.geist-800 { font-family: "Geist", sans-serif; font-weight: 800; font-optical-sizing: auto; }
+.geist-900 { font-family: "Geist", sans-serif; font-weight: 900; font-optical-sizing: auto; }
+
+/* Space Grotesk font, 可配合权重 */
+.space-300 { font-family: "Space Grotesk", sans-serif; font-weight: 300; }
+.space-400 { font-family: "Space Grotesk", sans-serif; font-weight: 400; }
+.space-500 { font-family: "Space Grotesk", sans-serif; font-weight: 500; }
+.space-600 { font-family: "Space Grotesk", sans-serif; font-weight: 600; }
+.space-700 { font-family: "Space Grotesk", sans-serif; font-weight: 700; }
