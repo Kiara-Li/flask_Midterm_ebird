@@ -28,5 +28,27 @@
   <div style="margin-top:20px;">
     {{ map_html|safe }}
   </div>
+  <script>
+async function loadBirdSound(species) {
+  const div = document.getElementById("audio-" + species.replace(/ /g, "_"));
+  div.innerHTML = "加载中...";
+  try {
+    const res = await fetch(`/birdsound?name=${encodeURIComponent(species)}`);
+    const data = await res.json();
+    if (!data.url) {
+      div.innerHTML = "❌ 没找到录音";
+      return;
+    }
+    const audio = document.createElement("audio");
+    audio.controls = true;
+    audio.src = data.url;
+    audio.style.width = "200px";
+    div.innerHTML = "";
+    div.appendChild(audio);
+  } catch (e) {
+    div.innerHTML = "⚠️ 加载失败";
+  }
+}
+</script>
 </body>
 {% endblock %}
